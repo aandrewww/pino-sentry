@@ -1,7 +1,7 @@
 {
   "name": "pino-sentry",
   "description": "@sentry/node transport for pino logger",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "author": "Andrew Avdeev <andrewww.avdeev@gmail.com>",
   "keywords": [
     "logger",
@@ -36,6 +36,7 @@
     "node": ">= 6.4.0"
   },
   "dependencies": {
+    "@sentry/node": "^5.5.0",
     "commander": "^2.20.0",
     "pify": "^4.0.1",
     "pump": "^3.0.0",
@@ -43,7 +44,6 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
-    "@sentry/node": "^5.5.0",
     "@types/node": "^12.6.9",
     "@types/pump": "^1.1.0",
     "@types/split2": "^2.1.6",
