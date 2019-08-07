@@ -18,6 +18,9 @@
     "/dist",
     "/src"
   ],
+  "bin": {
+    "pino-sentry": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint src/**/*.ts",
