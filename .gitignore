@@ -1,0 +1,16 @@
+# OSX
+#
+.DS_Store
+
+# node.js
+#
+node_modules
+yarn.lock
+npm-debug.log
+yarn-error.log
+
+# VSCode
+.vscode
+
+# Specific
+dist

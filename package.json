@@ -1,0 +1,55 @@
+{
+  "name": "pino-sentry",
+  "description": "@sentry/node transport for pino logger",
+  "version": "0.0.1",
+  "author": "Andrew Avdeev <andrewww.avdeev@gmail.com>",
+  "keywords": [
+    "logger",
+    "loggly",
+    "logging",
+    "node",
+    "tools",
+    "sentry",
+    "transport",
+    "pino"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "/dist",
+    "/src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src/**/*.ts",
+    "prepare": "npm run build"
+  },
+  "repository": "https://github.com/aandrewww/pino-sentry.git",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aandrewww/pino-sentry/issues"
+  },
+  "homepage": "https://github.com/aandrewww/pino-sentry#readme",
+  "engines": {
+    "node": ">= 6.4.0"
+  },
+  "dependencies": {
+    "commander": "^2.20.0",
+    "pify": "^4.0.1",
+    "pump": "^3.0.0",
+    "split2": "^3.1.1",
+    "through2": "^3.0.1"
+  },
+  "devDependencies": {
+    "@sentry/node": "^5.5.0",
+    "@types/node": "^12.6.9",
+    "@types/pump": "^1.1.0",
+    "@types/split2": "^2.1.6",
+    "@types/through2": "^2.0.34",
+    "@types/pify": "^3.0.2",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "eslint": "^5.16.0",
+    "pino": "^5.13.1",
+    "typescript": "^3.5.3"
+  }
+}
