@@ -36,50 +36,61 @@ class PinoSentryTransport {
     return Sentry;
   }
 
+  public parse(line: any) {
+    const chunk = JSON.parse(line);
+    const cb = () => {};
+
+    this.prepareAndGo(chunk, cb);
+  }
+
   public transformer(): stream.Transform {
     return through.obj((chunk: any, _enc: any, cb: any) => {
-      const severity = this.getLogSeverity(chunk.level);
-      const tags = chunk.tags || {};
+      this.prepareAndGo(chunk, cb);
+    });
+  }
 
-      if (chunk.reqId) {
-        tags.uuid = chunk.reqId;
-      }
+  public prepareAndGo(chunk: any, cb: any) {
+    const severity = this.getLogSeverity(chunk.level);
+    const tags = chunk.tags || {};
 
-      if (chunk.responseTime) {
-        tags.responseTime = chunk.responseTime;
-      }
+    if (chunk.reqId) {
+      tags.uuid = chunk.reqId;
+    }
 
-      if (chunk.hostname) {
-        tags.hostname = chunk.hostname;
-      }
+    if (chunk.responseTime) {
+      tags.responseTime = chunk.responseTime;
+    }
 
-      // const user = chunk.user || {};
+    if (chunk.hostname) {
+      tags.hostname = chunk.hostname;
+    }
 
-      let message = chunk.message;
-      let stack = chunk.stack || '';
+    // const user = chunk.user || {};
 
-      Sentry.configureScope(scope => {
-        if (this.isObject(tags)) {
-          Object.keys(tags).forEach(tag => scope.setExtra(tag, tags[tag]));
-        }
-      });
+    let message = chunk.message;
+    let stack = chunk.stack || '';
 
-      // Capturing Errors / Exceptions
-      if (this.shouldLogException(severity)) {
-        const error = message instanceof Error ? message : new ExtendedError({ message, stack });
-
-        setImmediate(() => {
-          Sentry.captureException(error);
-          cb();
-        });
-      } else {
-        // Capturing Messages
-        setImmediate(() => {
-          Sentry.captureMessage(message, severity);
-          cb();
-        });
+    Sentry.configureScope(scope => {
+      if (this.isObject(tags)) {
+        Object.keys(tags).forEach(tag => scope.setExtra(tag, tags[tag]));
       }
     });
+
+    // Capturing Errors / Exceptions
+    if (this.shouldLogException(severity)) {
+      const error = message instanceof Error ? message : new ExtendedError({ message, stack });
+
+      setImmediate(() => {
+        Sentry.captureException(error);
+        cb();
+      });
+    } else {
+      // Capturing Messages
+      setImmediate(() => {
+        Sentry.captureMessage(message, severity);
+        cb();
+      });
+    }
   }
 
   private withDefaults(options: Sentry.NodeOptions) {
@@ -103,7 +114,7 @@ class PinoSentryTransport {
   }
 };
 
-export function createWriteStream(options: any = {}) {
+export function createWriteStreamAsync(options: any = {}) {
   if (!options.dsn && !process.env.SENTRY_DSN) {
     throw Error('Sentry DSN missing');
   };
@@ -113,4 +124,16 @@ export function createWriteStream(options: any = {}) {
 
   const pumpAsync = pify(pump);
   return pumpAsync(process.stdin, split(JSON.parse), sentryTransformer);
+};
+
+
+export function createWriteStream(options: any = {}) {
+  if (!options.dsn && !process.env.SENTRY_DSN) {
+    throw Error('Sentry DSN missing');
+  };
+
+  const transport = new PinoSentryTransport(options);
+  const sentryParse = transport.parse.bind(transport);
+
+  return split(sentryParse);
 };

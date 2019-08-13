@@ -10,6 +10,8 @@ Load [pino](https://github.com/pinojs/pino) logs into [Sentry](https://sentry.io
 
 * [Install](#install)
 * [Usage](#usage)
+  - [CLI](#cli)
+  - [API](#api)
 * [Options](#options-options)
   - [Transport options](#transport-options)
   - [Log Level Mapping](#log-level-mapping)
@@ -23,8 +25,20 @@ npm install pino-sentry -g
 
 ## Usage
 
+### CLI
+
 ```bash
 node ./app.js | pino-sentry --dsn=https://******@sentry.io/12345
+```
+
+### API
+
+```js
+const { createWriteStream } = require('pino-sentry');
+// ...
+const opts = { /* ... */ };
+const stream = createWriteStream({ dsn: process.env.SENTRY_DSN });
+const logger = pino(opts, stream);
 ```
 
 ## Options (`options`)
