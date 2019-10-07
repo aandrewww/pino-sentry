@@ -67,8 +67,8 @@ class PinoSentryTransport {
 
     // const user = chunk.user || {};
 
-    let message = chunk.message;
-    let stack = chunk.stack || '';
+    const message = chunk.message;
+    const stack = chunk.stack || '';
 
     Sentry.configureScope(scope => {
       if (this.isObject(tags)) {
