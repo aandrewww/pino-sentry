@@ -17,6 +17,7 @@ function main () {
     .option('-mb, --maxBreadcrumbs <maxBreadcrumbs>', 'Total amount of breadcrumbs that should be captured')
     .action(async ({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs }) => {
       try {
+        console.info('start');
         const writeStream = await createWriteStreamAsync({
           dsn,
           serverName,

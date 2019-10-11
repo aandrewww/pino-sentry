@@ -123,7 +123,13 @@ export function createWriteStreamAsync(options: any = {}) {
   const sentryTransformer = transport.transformer();
 
   const pumpAsync = pify(pump);
-  return pumpAsync(process.stdin, split(JSON.parse), sentryTransformer);
+  return pumpAsync(process.stdin, split((line) => {
+    try {
+      return JSON.parse(line);
+    } catch(e) {
+      throw Error('logs should be in json format');
+    }
+  }), sentryTransformer);
 };
 
 
