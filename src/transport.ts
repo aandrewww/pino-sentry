@@ -67,7 +67,7 @@ class PinoSentryTransport {
 
     // const user = chunk.user || {};
 
-    const message = chunk.message;
+    const message = chunk.msg;
     const stack = chunk.stack || '';
 
     Sentry.configureScope(scope => {
