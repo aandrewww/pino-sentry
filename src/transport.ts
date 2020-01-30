@@ -67,7 +67,7 @@ class PinoSentryTransport {
 
     // const user = chunk.user || {};
 
-    const message = chunk.message;
+    const message = chunk.msg;
     const stack = chunk.stack || '';
 
     Sentry.configureScope(scope => {
@@ -81,12 +81,14 @@ class PinoSentryTransport {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
       setImmediate(() => {
+        console.log('error', error);
         Sentry.captureException(error);
         cb();
       });
     } else {
       // Capturing Messages
       setImmediate(() => {
+        console.log('message', message, severity);
         Sentry.captureMessage(message, severity);
         cb();
       });
