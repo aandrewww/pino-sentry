@@ -81,14 +81,12 @@ class PinoSentryTransport {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
       setImmediate(() => {
-        console.log('error', error);
         Sentry.captureException(error);
         cb();
       });
     } else {
       // Capturing Messages
       setImmediate(() => {
-        console.log('message', message, severity);
         Sentry.captureMessage(message, severity);
         cb();
       });
