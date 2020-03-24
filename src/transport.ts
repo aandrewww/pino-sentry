@@ -22,14 +22,22 @@ class PinoSentryTransport {
     40: Sentry.Severity.Warning, // pino: warn
     50: Sentry.Severity.Error,   // pino: error
     60: Sentry.Severity.Fatal,   // pino: fatal
+    // Support for useLevelLabels
+    // https://github.com/pinojs/pino/blob/master/docs/api.md#uselevellabels-boolean
+    trace: Sentry.Severity.Debug,
+    debug: Sentry.Severity.Debug,
+    info: Sentry.Severity.Info,
+    warning: Sentry.Severity.Warning,
+    error: Sentry.Severity.Error,
+    fatal: Sentry.Severity.Fatal,
   };
 
   public constructor (options?: Sentry.NodeOptions) {
     Sentry.init(this.withDefaults(options || {}));
   }
 
-  public getLogSeverity(level: number): Sentry.Severity  {
-    return (this.SEVERITIES_MAP as any)[level];
+  public getLogSeverity(level: number | string): Sentry.Severity  {
+    return (this.SEVERITIES_MAP as any)[level] || Sentry.Severity.Info;
   }
 
   public get sentry() {
