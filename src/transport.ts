@@ -1,4 +1,4 @@
-import stream from 'stream';
+import stream  from 'stream';
 import split from 'split2';
 import pump from 'pump';
 import through from 'through2';
@@ -14,7 +14,17 @@ class ExtendedError extends Error {
   }
 }
 
-class PinoSentryTransport {
+function defaults<T>(target: Partial<T>, source: Partial<T>): Partial<T> {
+  const ret: Partial<T> = { ...target };
+  for (const key of (Object.keys(source) as (keyof T)[])) {
+    if (target[key] === undefined) {
+      ret[key] = source[key];
+    }
+  }
+  return ret;
+}
+
+export class PinoSentryTransport {
   private SEVERITIES_MAP = {
     10: Sentry.Severity.Debug,   // pino: trace
     20: Sentry.Severity.Debug,   // pino: debug
@@ -24,11 +34,11 @@ class PinoSentryTransport {
     60: Sentry.Severity.Fatal,   // pino: fatal
   };
 
-  public constructor (options?: Sentry.NodeOptions) {
+  public constructor(options?: Sentry.NodeOptions) {
     Sentry.init(this.withDefaults(options || {}));
   }
 
-  public getLogSeverity(level: number): Sentry.Severity  {
+  public getLogSeverity(level: number): Sentry.Severity {
     return (this.SEVERITIES_MAP as any)[level];
   }
 
@@ -38,7 +48,8 @@ class PinoSentryTransport {
 
   public parse(line: any) {
     const chunk = JSON.parse(line);
-    const cb = () => {};
+    const cb = () => {
+    };
 
     this.prepareAndGo(chunk, cb);
   }
@@ -49,7 +60,7 @@ class PinoSentryTransport {
     });
   }
 
-  public prepareAndGo(chunk: any, cb: any) {
+  public prepareAndGo(chunk: any, cb: any): void {
     const severity = this.getLogSeverity(chunk.level);
     const tags = chunk.tags || {};
 
@@ -93,31 +104,35 @@ class PinoSentryTransport {
     }
   }
 
-  private withDefaults(options: Sentry.NodeOptions) {
-    return {
-      dsn: options.dsn || process.env.SENTRY_DSN || '',
-      serverName: options && options.serverName || 'pino-sentry',
-      environment: options && options.environment || process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'production',
-      debug: options && options.debug || !!process.env.SENTRY_DEBUG || false,
-      sampleRate: options && options.sampleRate || 1.0,
-      maxBreadcrumbs: options && options.maxBreadcrumbs || 100,
-    };
+  private withDefaults(options: Sentry.NodeOptions): Sentry.NodeOptions {
+    if (!options) {
+      options = {};
+    }
+    return defaults(options, {
+      dsn: process.env.SENTRY_DSN || '',
+      serverName: 'pino-sentry',
+      environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'production',
+      debug: !!process.env.SENTRY_DEBUG || false,
+      sampleRate: 1.0,
+      maxBreadcrumbs: 100,
+    });
   }
 
-  private isObject(obj: any) {
+  private isObject(obj: any): boolean {
     const type = typeof obj;
     return type === 'function' || type === 'object' && !!obj;
   }
 
-  private shouldLogException(level: Sentry.Severity) {
+  private shouldLogException(level: Sentry.Severity): boolean {
     return level === Sentry.Severity.Fatal || level === Sentry.Severity.Error;
   }
 };
 
-export function createWriteStreamAsync(options: any = {}) {
+export function createWriteStreamAsync(options: Sentry.NodeOptions = {}): PromiseLike<stream.Transform> {
   if (!options.dsn && !process.env.SENTRY_DSN) {
     throw Error('Sentry DSN missing');
-  };
+  }
+  ;
 
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
@@ -126,20 +141,20 @@ export function createWriteStreamAsync(options: any = {}) {
   return pumpAsync(process.stdin, split((line) => {
     try {
       return JSON.parse(line);
-    } catch(e) {
+    } catch (e) {
       throw Error('logs should be in json format');
     }
   }), sentryTransformer);
 };
 
 
-export function createWriteStream(options: any = {}) {
+export function createWriteStream(options: Sentry.NodeOptions = {}): stream.Transform & { transport: PinoSentryTransport } {
   if (!options.dsn && !process.env.SENTRY_DSN) {
     throw Error('Sentry DSN missing');
-  };
+  }
 
   const transport = new PinoSentryTransport(options);
   const sentryParse = transport.parse.bind(transport);
 
-  return split(sentryParse);
+  return Object.assign(split(sentryParse), { transport });
 };
