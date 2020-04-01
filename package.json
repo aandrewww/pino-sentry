@@ -1,7 +1,7 @@
 {
   "name": "pino-sentry",
   "description": "@sentry/node transport for pino logger",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "author": "Andrew Avdeev <andrewww.avdeev@gmail.com>",
   "keywords": [
     "logger",
@@ -52,7 +52,7 @@
     "@types/through2": "^2.0.34",
     "@typescript-eslint/eslint-plugin": "^2.3.2",
     "@typescript-eslint/parser": "^2.3.2",
-    "eslint": "^6.5.1",
+    "eslint": "^6.8.0",
     "pino": "^5.13.1",
     "typescript": "^3.6.3"
   }
