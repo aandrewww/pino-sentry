@@ -140,7 +140,6 @@ export function createWriteStreamAsync(options: Sentry.NodeOptions = {}): Promis
   if (!options.dsn && !process.env.SENTRY_DSN) {
     throw Error('Sentry DSN missing');
   }
-  ;
 
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
