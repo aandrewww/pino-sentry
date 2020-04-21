@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "inlineSources": true,
     "importHelpers": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es2018"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitHelpers": true,
@@ -18,7 +18,7 @@
     "pretty": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es5",
+    "target": "es2018", // Node 10. https://stackoverflow.com/a/57607634/6635914
     "strictBindCallApply": false,
     "resolveJsonModule": true,
     "typeRoots": [

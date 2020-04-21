@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/aandrewww/pino-sentry#readme",
   "engines": {
-    "node": ">= 6.4.0"
+    "node": ">=10"
   },
   "dependencies": {
     "@sentry/node": "^5.5.0",
@@ -42,7 +42,8 @@
     "pify": "^4.0.1",
     "pump": "^3.0.0",
     "split2": "^3.1.1",
-    "through2": "^3.0.1"
+    "through2": "^3.0.1",
+    "tslib": "^1.11.1"
   },
   "devDependencies": {
     "@types/node": "^12.6.9",
