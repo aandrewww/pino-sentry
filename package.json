@@ -15,17 +15,14 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "/dist",
-    "/src"
-  ],
   "bin": {
     "pino-sentry": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "build": "tsc -b tsconfig.build.json",
     "lint": "eslint src/**/*.ts",
-    "prepare": "npm run build"
+    "prepublishOnly": "npm run lint && npm run build"
   },
   "repository": "https://github.com/aandrewww/pino-sentry.git",
   "license": "MIT",
@@ -34,7 +31,7 @@
   },
   "homepage": "https://github.com/aandrewww/pino-sentry#readme",
   "engines": {
-    "node": ">= 6.4.0"
+    "node": ">=10"
   },
   "dependencies": {
     "@sentry/node": "^5.5.0",

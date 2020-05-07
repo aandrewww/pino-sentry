@@ -118,7 +118,9 @@ export class PinoSentryTransport {
     }
     return defaults(options, {
       dsn: process.env.SENTRY_DSN || '',
-      serverName: 'pino-sentry',
+      // npm_package_name will be available if ran with
+      // from a "script" field in package.json.
+      serverName: process.env.npm_package_name || 'pino-sentry',
       environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'production',
       debug: !!process.env.SENTRY_DEBUG || false,
       sampleRate: 1.0,
