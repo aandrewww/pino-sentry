@@ -14,40 +14,39 @@ class ExtendedError extends Error {
   }
 }
 
-function defaults<T>(target: Partial<T>, source: Partial<T>): Partial<T> {
-  const ret: Partial<T> = { ...target };
-  for (const key of (Object.keys(source) as (keyof T)[])) {
-    if (target[key] === undefined) {
-      ret[key] = source[key];
-    }
-  }
-  return ret;
+function writeToStdout() {
+  return through(function(chunk, _enc, cb) {
+    this.push(chunk);
+    process.stdout.write(chunk);
+    cb();
+  });
 }
 
-export class PinoSentryTransport {
-  private SEVERITIES_MAP = {
-    10: Sentry.Severity.Debug,   // pino: trace
-    20: Sentry.Severity.Debug,   // pino: debug
-    30: Sentry.Severity.Info,    // pino: info
-    40: Sentry.Severity.Warning, // pino: warn
-    50: Sentry.Severity.Error,   // pino: error
-    60: Sentry.Severity.Fatal,   // pino: fatal
-    // Support for useLevelLabels
-    // https://github.com/pinojs/pino/blob/master/docs/api.md#uselevellabels-boolean
-    trace: Sentry.Severity.Debug,
-    debug: Sentry.Severity.Debug,
-    info: Sentry.Severity.Info,
-    warning: Sentry.Severity.Warning,
-    error: Sentry.Severity.Error,
-    fatal: Sentry.Severity.Fatal,
-  };
+const SEVERITIES_MAP = {
+  10: Sentry.Severity.Debug,   // pino: trace
+  20: Sentry.Severity.Debug,   // pino: debug
+  30: Sentry.Severity.Info,    // pino: info
+  40: Sentry.Severity.Warning, // pino: warn
+  50: Sentry.Severity.Error,   // pino: error
+  60: Sentry.Severity.Fatal,   // pino: fatal
+  // Support for useLevelLabels
+  // https://github.com/pinojs/pino/blob/master/docs/api.md#uselevellabels-boolean
+  trace: Sentry.Severity.Debug,
+  debug: Sentry.Severity.Debug,
+  info: Sentry.Severity.Info,
+  warning: Sentry.Severity.Warning,
+  error: Sentry.Severity.Error,
+  fatal: Sentry.Severity.Fatal,
+} as const;
 
+
+export class PinoSentryTransport {
   public constructor(options?: Sentry.NodeOptions) {
     Sentry.init(this.withDefaults(options || {}));
   }
 
-  public getLogSeverity(level: number): Sentry.Severity {
-    return (this.SEVERITIES_MAP as any)[level] || Sentry.Severity.Info;
+  public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Sentry.Severity {
+    return SEVERITIES_MAP[level] || Sentry.Severity.Info;
   }
 
   public get sentry() {
@@ -112,11 +111,8 @@ export class PinoSentryTransport {
     }
   }
 
-  private withDefaults(options: Sentry.NodeOptions): Sentry.NodeOptions {
-    if (!options) {
-      options = {};
-    }
-    return defaults(options, {
+  private withDefaults(options: Sentry.NodeOptions = {}): Sentry.NodeOptions {
+    return {
       dsn: process.env.SENTRY_DSN || '',
       // npm_package_name will be available if ran with
       // from a "script" field in package.json.
@@ -125,7 +121,8 @@ export class PinoSentryTransport {
       debug: !!process.env.SENTRY_DEBUG || false,
       sampleRate: 1.0,
       maxBreadcrumbs: 100,
-    });
+      ...options,
+    };
   }
 
   private isObject(obj: any): boolean {
@@ -147,13 +144,17 @@ export function createWriteStreamAsync(options: Sentry.NodeOptions = {}): Promis
   const sentryTransformer = transport.transformer();
 
   const pumpAsync = pify(pump);
-  return pumpAsync(process.stdin, split((line) => {
-    try {
-      return JSON.parse(line);
-    } catch (e) {
-      throw Error('logs should be in json format');
-    }
-  }), sentryTransformer);
+  return pumpAsync(
+    process.stdin.pipe(writeToStdout()),
+    split((line) => {
+      try {
+        return JSON.parse(line);
+      } catch (e) {
+        throw Error('logs should be in json format');
+      }
+    }),
+    sentryTransformer
+  );
 };
 
 
