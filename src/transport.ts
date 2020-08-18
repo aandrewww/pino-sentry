@@ -108,14 +108,17 @@ export class PinoSentryTransport {
       tags.hostname = chunk.hostname;
     }
 
-    // const user = chunk.user || {};
+    const extra = chunk.extra || {};
 
     const message = chunk.msg;
     const stack = chunk.stack || '';
 
     Sentry.configureScope(scope => {
       if (this.isObject(tags)) {
-        Object.keys(tags).forEach(tag => scope.setExtra(tag, tags[tag]));
+        Object.keys(tags).forEach(tag => scope.setTag(tag, tags[tag]));
+      }
+      if (this.isObject(extra)) {
+        Object.keys(extra).forEach(ext => scope.setExtra(ext, extra[ext]));
       }
     });
 
