@@ -139,7 +139,7 @@ export class PinoSentryTransport {
   private validateOptions(options: PinoSentryOptions): PinoSentryOptions {
     const dsn = options.dsn || process.env.SENTRY_DSN;
     if (!dsn) {
-      throw Error('[pino-sentry] Sentry DSN must be supplied. Pass via options or `SENTRY_DSN` environment variable');
+      console.log('Warning: [pino-sentry] Sentry DSN must be supplied, otherwise logs will not be reported. Pass via options or `SENTRY_DSN` environment variable.');
     }
     if (options.level) {
       const allowedLevels = Object.keys(SeverityIota);
@@ -189,7 +189,8 @@ export function createWriteStreamAsync(options?: PinoSentryOptions): PromiseLike
       try {
         return JSON.parse(line);
       } catch (e) {
-        throw Error('logs should be in json format');
+        // Returning undefined will not run the sentryTransformer
+        return;
       }
     }),
     sentryTransformer

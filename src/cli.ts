@@ -37,7 +37,8 @@ function main() {
         process.stdin.pipe(writeStream);
         console.info('[pino-sentry] logging initialized');
       } catch (error) {
-        console.log(`[pino-sentry] ${error.message}`);
+        console.log(`[pino-sentry]`, error);
+        process.exit(1);
       }
     });
 
