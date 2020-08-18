@@ -5,6 +5,8 @@ import through from 'through2';
 import pify from 'pify';
 import * as Sentry from '@sentry/node';
 
+type ValueOf<T> = T extends any[] ? T[number] : T[keyof T]
+
 class ExtendedError extends Error {
   public constructor(info: any) {
     super(info.message);
@@ -39,10 +41,27 @@ const SEVERITIES_MAP = {
   fatal: Sentry.Severity.Fatal,
 } as const;
 
+// How severe the Severity is
+const SeverityIota  = {
+  [Sentry.Severity.Debug]: 1,
+  [Sentry.Severity.Log]: 2,
+  [Sentry.Severity.Info]: 3,
+  [Sentry.Severity.Warning]: 4,
+  [Sentry.Severity.Error]: 5,
+  [Sentry.Severity.Fatal]: 6,
+  [Sentry.Severity.Critical]: 7,
+} as const;
+
+interface PinoSentryOptions extends Sentry.NodeOptions {
+  /** Minimum level for a log to be reported to Sentry from pino-sentry */
+  level?: keyof typeof SeverityIota;
+}
 
 export class PinoSentryTransport {
-  public constructor(options?: Sentry.NodeOptions) {
-    Sentry.init(this.withDefaults(options || {}));
+  // Default minimum log level to `debug`
+  minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
+  public constructor(options?: PinoSentryOptions) {
+    Sentry.init(this.validateOptions(options || {}));
   }
 
   public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Sentry.Severity {
@@ -69,6 +88,12 @@ export class PinoSentryTransport {
 
   public prepareAndGo(chunk: any, cb: any): void {
     const severity = this.getLogSeverity(chunk.level);
+    // Check if we send this Severity to Sentry
+    if (this.shouldLog(severity) === false) {
+      setImmediate(cb);
+      return;
+    };
+
     const tags = chunk.tags || {};
 
     if (chunk.reqId) {
@@ -95,7 +120,7 @@ export class PinoSentryTransport {
     });
 
     // Capturing Errors / Exceptions
-    if (this.shouldLogException(severity)) {
+    if (this.isSentryException(severity)) {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
       setImmediate(() => {
@@ -111,9 +136,22 @@ export class PinoSentryTransport {
     }
   }
 
-  private withDefaults(options: Sentry.NodeOptions = {}): Sentry.NodeOptions {
+  private validateOptions(options: PinoSentryOptions): PinoSentryOptions {
+    const dsn = options.dsn || process.env.SENTRY_DSN;
+    if (!dsn) {
+      throw Error('[pino-sentry] Sentry DSN must be supplied. Pass via options or `SENTRY_DSN` environment variable');
+    }
+    if (options.level) {
+      const allowedLevels = Object.keys(SeverityIota);
+      if (allowedLevels.includes(options.level) === false)  {
+        throw new Error(`[pino-sentry] Option \`level\` must be one of: ${allowedLevels.join(', ')}. Received: ${options.level}`);
+      }
+      // Set minimum log level
+      this.minimumLogLevel = SeverityIota[options.level];
+    }
+
     return {
-      dsn: process.env.SENTRY_DSN || '',
+      dsn,
       // npm_package_name will be available if ran with
       // from a "script" field in package.json.
       serverName: process.env.npm_package_name || 'pino-sentry',
@@ -130,16 +168,17 @@ export class PinoSentryTransport {
     return type === 'function' || type === 'object' && !!obj;
   }
 
-  private shouldLogException(level: Sentry.Severity): boolean {
+  private isSentryException(level: Sentry.Severity): boolean {
     return level === Sentry.Severity.Fatal || level === Sentry.Severity.Error;
+  }
+
+  private shouldLog(severity: Sentry.Severity): boolean {
+    const logLevel = SeverityIota[severity];
+    return logLevel >= this.minimumLogLevel;
   }
 };
 
-export function createWriteStreamAsync(options: Sentry.NodeOptions = {}): PromiseLike<stream.Transform> {
-  if (!options.dsn && !process.env.SENTRY_DSN) {
-    throw Error('Sentry DSN missing');
-  }
-
+export function createWriteStreamAsync(options?: PinoSentryOptions): PromiseLike<stream.Transform> {
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
 
@@ -158,11 +197,7 @@ export function createWriteStreamAsync(options: Sentry.NodeOptions = {}): Promis
 };
 
 
-export function createWriteStream(options: Sentry.NodeOptions = {}): stream.Transform & { transport: PinoSentryTransport } {
-  if (!options.dsn && !process.env.SENTRY_DSN) {
-    throw Error('Sentry DSN missing');
-  }
-
+export function createWriteStream(options?: PinoSentryOptions): stream.Transform & { transport: PinoSentryTransport } {
   const transport = new PinoSentryTransport(options);
   const sentryParse = transport.parse.bind(transport);
 

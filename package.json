@@ -34,7 +34,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@sentry/node": "^5.5.0",
+    "@sentry/node": "^5.21.1",
     "commander": "^2.20.0",
     "pify": "^4.0.1",
     "pump": "^3.0.0",

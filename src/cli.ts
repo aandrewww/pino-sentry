@@ -18,9 +18,9 @@ function main() {
     .option('-di, --dist <dist>', 'Sets the distribution for all events')
     .option('--maxValueLength <maxValueLength>', 'Maximum number of chars a single value can have before it will be truncated.')
     .option('--release <release>', 'The release identifier used when uploading respective source maps.')
-    .action(async ({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, logLevel, maxValueLength, release }) => {
+    .option('-l, --level <level>', 'The minimum level for a log to be reported to Sentry')
+    .action(async ({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, logLevel, maxValueLength, release, level }) => {
       try {
-        console.info('start');
         const writeStream = await createWriteStreamAsync({
           dsn,
           serverName,
@@ -32,11 +32,12 @@ function main() {
           logLevel,
           maxValueLength,
           release,
+          level,
         });
         process.stdin.pipe(writeStream);
-        console.info('logging');
+        console.info('[pino-sentry] logging initialized');
       } catch (error) {
-        console.log(error.message);
+        console.log(`[pino-sentry] ${error.message}`);
       }
     });
 

@@ -51,6 +51,7 @@ const logger = pino(opts, stream);
 * `--debug` (`-dm`): turns debug mode on or off (default to `process.env.SENTRY_DEBUG || false`)
 * `--sampleRate` (`-sr`): sample rate as a percentage of events to be sent in the range of 0.0 to 1.0 (default to `1.0`)
 * `--maxBreadcrumbs` (`-mx`): total amount of breadcrumbs that should be captured (default to `100`)
+* `--level` (`-l`): minimum level for a log to be reported to Sentry (default to `debug`)
 
 ### Log Level Mapping
 
