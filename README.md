@@ -41,10 +41,10 @@ const stream = createWriteStream({ dsn: process.env.SENTRY_DSN });
 const logger = pino(opts, stream);
 
 // add tags
-logger.info({tags : { foo : "bar" }, msg : "Error"})
+logger.info({ tags : { foo : "bar" }, msg : "Error" });
 
 // add extra
-logger.info({extra : { foo : "bar" }, msg : "Error"})
+logger.info({ extra : { foo : "bar" }, msg : "Error" });
 ```
 
 ## Options (`options`)
