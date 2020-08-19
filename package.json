@@ -46,8 +46,8 @@
     "@types/pumpify": "^1.4.1",
     "@types/split2": "^2.1.6",
     "@types/through2": "^2.0.34",
-    "@typescript-eslint/eslint-plugin": "^2.3.2",
-    "@typescript-eslint/parser": "^2.3.2",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "eslint": "^6.8.0",
     "pino": "^6.5.1",
     "typescript": "^3.9.7"
