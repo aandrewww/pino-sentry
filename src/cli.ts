@@ -3,7 +3,7 @@
 import program from 'commander';
 
 // import pkg from '../package.json';
-import { createWriteStreamAsync } from './transport';
+import { createWriteStream } from './transport';
 
 // main cli logic
 function main() {
@@ -19,9 +19,9 @@ function main() {
     .option('--maxValueLength <maxValueLength>', 'Maximum number of chars a single value can have before it will be truncated.')
     .option('--release <release>', 'The release identifier used when uploading respective source maps.')
     .option('-l, --level <level>', 'The minimum level for a log to be reported to Sentry')
-    .action(async ({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, logLevel, maxValueLength, release, level }) => {
+    .action(({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, logLevel, maxValueLength, release, level }) => {
       try {
-        const writeStream = await createWriteStreamAsync({
+        const writeStream = createWriteStream({
           dsn,
           serverName,
           environment,
@@ -34,10 +34,14 @@ function main() {
           release,
           level,
         });
+        // Echo to stdout
+        process.stdin.pipe(process.stdout);
+        // Pipe to writeStream
         process.stdin.pipe(writeStream);
-        console.info('[pino-sentry] logging initialized');
+        console.info('[pino-sentry] Logging Initialized');
       } catch (error) {
-        console.log(`[pino-sentry] ${error.message}`);
+        console.log('[pino-sentry]', error);
+        process.exit(1);
       }
     });
 

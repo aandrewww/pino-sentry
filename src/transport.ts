@@ -1,8 +1,7 @@
 import stream  from 'stream';
 import split from 'split2';
-import pump from 'pump';
+import pump from 'pumpify';
 import through from 'through2';
-import pify from 'pify';
 import * as Sentry from '@sentry/node';
 
 type ValueOf<T> = T extends any[] ? T[number] : T[keyof T]
@@ -14,14 +13,6 @@ class ExtendedError extends Error {
     this.name = "Error";
     this.stack = info.stack || null;
   }
-}
-
-function writeToStdout() {
-  return through(function(chunk, _enc, cb) {
-    this.push(chunk);
-    process.stdout.write(chunk);
-    cb();
-  });
 }
 
 const SEVERITIES_MAP = {
@@ -70,14 +61,6 @@ export class PinoSentryTransport {
 
   public get sentry() {
     return Sentry;
-  }
-
-  public parse(line: any) {
-    const chunk = JSON.parse(line);
-    const cb = () => {
-    };
-
-    this.prepareAndGo(chunk, cb);
   }
 
   public transformer(): stream.Transform {
@@ -139,7 +122,7 @@ export class PinoSentryTransport {
   private validateOptions(options: PinoSentryOptions): PinoSentryOptions {
     const dsn = options.dsn || process.env.SENTRY_DSN;
     if (!dsn) {
-      throw Error('[pino-sentry] Sentry DSN must be supplied. Pass via options or `SENTRY_DSN` environment variable');
+      console.log('Warning: [pino-sentry] Sentry DSN must be supplied, otherwise logs will not be reported. Pass via options or `SENTRY_DSN` environment variable.');
     }
     if (options.level) {
       const allowedLevels = Object.keys(SeverityIota);
@@ -178,28 +161,22 @@ export class PinoSentryTransport {
   }
 };
 
-export function createWriteStreamAsync(options?: PinoSentryOptions): PromiseLike<stream.Transform> {
+export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
 
-  const pumpAsync = pify(pump);
-  return pumpAsync(
-    process.stdin.pipe(writeToStdout()),
+  return new pump(
     split((line) => {
       try {
         return JSON.parse(line);
       } catch (e) {
-        throw Error('logs should be in json format');
+        // Returning undefined will not run the sentryTransformer
+        return;
       }
     }),
     sentryTransformer
   );
 };
 
-
-export function createWriteStream(options?: PinoSentryOptions): stream.Transform & { transport: PinoSentryTransport } {
-  const transport = new PinoSentryTransport(options);
-  const sentryParse = transport.parse.bind(transport);
-
-  return Object.assign(split(sentryParse), { transport });
-};
+// Duplicate to not break API
+export const createWriteStreamAsync = createWriteStream;
