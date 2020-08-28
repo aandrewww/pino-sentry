@@ -54,9 +54,9 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
 export class PinoSentryTransport {
   // Default minimum log level to `debug`
   minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
-  messageAttributeKey: string = 'msg';
-  extraAttributeKeys: string[] = ['extra'];
-  stackAttributeKey: string = 'stack';
+  messageAttributeKey = 'msg';
+  extraAttributeKeys = ['extra'];
+  stackAttributeKey = 'stack';
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
