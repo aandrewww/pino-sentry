@@ -49,6 +49,27 @@ logger.info({ extra : { foo : "bar" }, msg : "Error" });
 
 ## Options (`options`)
 
+### Override Message Attributes
+
+In case the generated message does not follow the standard convention, the main attribute keys can be mapped to different values, when the stream gets created. Following attribute keys can be overridden:
+
+* `msg`
+* `extra`
+* `stack`
+
+```js
+const { createWriteStream } = require('pino-sentry');
+// ...
+const opts = { /* ... */ };
+const stream = createWriteStream({ 
+  dsn: process.env.SENTRY_DSN,
+  messageAttributeKey: 'message',
+  stackAttributeKey: 'trace',
+  extraAttributeKeys: ['req', 'context']
+});
+const logger = pino(opts, stream);
+```
+
 ### Transport options
 
 * `--dsn` (`-d`): your Sentry DSN or Data Source Name (defaults to `process.env.SENTRY_DSN`)
