@@ -47,7 +47,7 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
   level?: keyof typeof SeverityIota;
   messageAttributeKey?: string;
-  extraAttributeKey?: string;
+  extraAttributeKeys?: string[];
   stackAttributeKey?: string;
 }
 
@@ -55,7 +55,7 @@ export class PinoSentryTransport {
   // Default minimum log level to `debug`
   minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
   messageAttributeKey: string = 'msg';
-  extraAttributeKey: string = 'extra';
+  extraAttributeKeys: string[] = ['extra'];
   stackAttributeKey: string = 'stack';
 
   public constructor(options?: PinoSentryOptions) {
@@ -98,7 +98,12 @@ export class PinoSentryTransport {
       tags.hostname = chunk.hostname;
     }
 
-    const extra = chunk[this.extraAttributeKey] || {};
+    const extra: any = {};
+    this.extraAttributeKeys.forEach((key: string) => {
+      if(chunk[key] !== undefined) {
+        extra[key] = chunk[key];
+      }
+    });
     const message = chunk[this.messageAttributeKey];
     const stack = chunk[this.stackAttributeKey] || '';
 
@@ -143,7 +148,7 @@ export class PinoSentryTransport {
     }
 
     this.stackAttributeKey = options.stackAttributeKey ?? this.stackAttributeKey;
-    this.extraAttributeKey = options.extraAttributeKey ?? this.extraAttributeKey;
+    this.extraAttributeKeys = options.extraAttributeKeys ?? this.extraAttributeKeys;
     this.messageAttributeKey = options.messageAttributeKey ?? this.messageAttributeKey;
 
     return {

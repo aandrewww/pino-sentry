@@ -65,7 +65,7 @@ const stream = createWriteStream({
   dsn: process.env.SENTRY_DSN,
   messageAttributeKey: 'message',
   stackAttributeKey: 'trace',
-  extraAttributeKey: 'req'
+  extraAttributeKeys: ['req', 'context']
 });
 const logger = pino(opts, stream);
 ```
