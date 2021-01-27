@@ -1,7 +1,7 @@
 {
   "name": "pino-sentry",
   "description": "@sentry/node transport for pino logger",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": "Andrew Avdeev <andrewww.avdeev@gmail.com>",
   "keywords": [
     "logger",
