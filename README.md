@@ -56,16 +56,18 @@ In case the generated message does not follow the standard convention, the main 
 * `msg`
 * `extra`
 * `stack`
+* `maxValueLength` - option to adjust max string length for values, default is 250
 
 ```js
 const { createWriteStream } = require('pino-sentry');
 // ...
 const opts = { /* ... */ };
-const stream = createWriteStream({ 
+const stream = createWriteStream({
   dsn: process.env.SENTRY_DSN,
   messageAttributeKey: 'message',
   stackAttributeKey: 'trace',
-  extraAttributeKeys: ['req', 'context']
+  extraAttributeKeys: ['req', 'context'],
+  maxValueLength: 250,
 });
 const logger = pino(opts, stream);
 ```

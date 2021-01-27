@@ -49,6 +49,7 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   messageAttributeKey?: string;
   extraAttributeKeys?: string[];
   stackAttributeKey?: string;
+  maxValueLength?: number;
 }
 
 export class PinoSentryTransport {
@@ -57,6 +58,7 @@ export class PinoSentryTransport {
   messageAttributeKey = 'msg';
   extraAttributeKeys = ['extra'];
   stackAttributeKey = 'stack';
+  maxValueLength = 250;
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
@@ -150,6 +152,7 @@ export class PinoSentryTransport {
     this.stackAttributeKey = options.stackAttributeKey ?? this.stackAttributeKey;
     this.extraAttributeKeys = options.extraAttributeKeys ?? this.extraAttributeKeys;
     this.messageAttributeKey = options.messageAttributeKey ?? this.messageAttributeKey;
+    this.maxValueLength = options.maxValueLength ?? this.maxValueLength;
 
     return {
       dsn,
