@@ -3,6 +3,7 @@ import split from 'split2';
 import pump from 'pumpify';
 import through from 'through2';
 import * as Sentry from '@sentry/node';
+import { Breadcrumb } from '@sentry/types';
 
 type ValueOf<T> = T extends any[] ? T[number] : T[keyof T]
 
@@ -87,6 +88,7 @@ export class PinoSentryTransport {
     }
 
     const tags = chunk.tags || {};
+    const breadcrumbs: Breadcrumb[] = chunk.breadcrumbs || {};
 
     if (chunk.reqId) {
       tags.uuid = chunk.reqId;
@@ -115,6 +117,9 @@ export class PinoSentryTransport {
       }
       if (this.isObject(extra)) {
         Object.keys(extra).forEach(ext => scope.setExtra(ext, extra[ext]));
+      }
+      if (this.isObject(breadcrumbs)) {
+        Object.values(breadcrumbs).forEach(breadcrumb => scope.addBreadcrumb(breadcrumb));
       }
 
       // Capturing Errors / Exceptions
