@@ -84,7 +84,7 @@ export class PinoSentryTransport {
     if (this.shouldLog(severity) === false) {
       setImmediate(cb);
       return;
-    };
+    }
 
     const tags = chunk.tags || {};
 
