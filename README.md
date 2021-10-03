@@ -45,6 +45,19 @@ logger.info({ tags : { foo : "bar" }, msg : "Error" });
 
 // add extra
 logger.info({ extra : { foo : "bar" }, msg : "Error" });
+
+// add breadcrumbs
+// https://docs.sentry.io/platforms/node/enriching-events/breadcrumbs/
+logger.info({
+  msg: "Error",
+  breadcrumbs: [
+    {
+      category: "auth",
+      message: "Authenticated user " + user.email,
+      level: "info",
+    },
+  ]
+});
 ```
 
 ## Options (`options`)
