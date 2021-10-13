@@ -111,33 +111,35 @@ export class PinoSentryTransport {
     const message = chunk[this.messageAttributeKey];
     const stack = chunk[this.stackAttributeKey] || '';
 
-    Sentry.withScope(scope => {
-      if (this.isObject(tags)) {
-        Object.keys(tags).forEach(tag => scope.setTag(tag, tags[tag]));
-      }
-      if (this.isObject(extra)) {
-        Object.keys(extra).forEach(ext => scope.setExtra(ext, extra[ext]));
-      }
-      if (this.isObject(breadcrumbs)) {
-        Object.values(breadcrumbs).forEach(breadcrumb => scope.addBreadcrumb(breadcrumb));
-      }
+    const scope = new Sentry.Scope();
 
-      // Capturing Errors / Exceptions
-      if (this.isSentryException(severity)) {
-        const error = message instanceof Error ? message : new ExtendedError({ message, stack });
+    scope.setLevel(severity);
 
-        setImmediate(() => {
-          Sentry.captureException(error);
-          cb();
-        });
-      } else {
-        // Capturing Messages
-        setImmediate(() => {
-          Sentry.captureMessage(message, severity);
-          cb();
-        });
-      }
-    });
+    if (this.isObject(tags)) {
+      Object.keys(tags).forEach(tag => scope.setTag(tag, tags[tag]));
+    }
+    if (this.isObject(extra)) {
+      Object.keys(extra).forEach(ext => scope.setExtra(ext, extra[ext]));
+    }
+    if (this.isObject(breadcrumbs)) {
+      Object.values(breadcrumbs).forEach(breadcrumb => scope.addBreadcrumb(breadcrumb));
+    }
+
+    // Capturing Errors / Exceptions
+    if (this.isSentryException(severity)) {
+      const error = message instanceof Error ? message : new ExtendedError({ message, stack });
+
+      setImmediate(() => {
+        Sentry.captureException(error, scope);
+        cb();
+      });
+    } else {
+      // Capturing Messages
+      setImmediate(() => {
+        Sentry.captureMessage(message, scope);
+        cb();
+      });
+    }
   }
 
   private validateOptions(options: PinoSentryOptions): PinoSentryOptions {
