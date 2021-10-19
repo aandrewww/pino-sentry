@@ -87,6 +87,13 @@ export class PinoSentryTransport {
       return;
     }
 
+    setImmediate(() => {
+      this.processChunk(severity, chunk);
+      cb();
+    });
+  }
+
+  private processChunk(severity: Sentry.Severity, chunk: any): void {
     const tags = chunk.tags || {};
     const breadcrumbs: Breadcrumb[] = chunk.breadcrumbs || {};
 
@@ -126,16 +133,10 @@ export class PinoSentryTransport {
       if (this.isSentryException(severity)) {
         const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
-        setImmediate(() => {
-          Sentry.captureException(error);
-          cb();
-        });
+        Sentry.captureException(error);
       } else {
         // Capturing Messages
-        setImmediate(() => {
-          Sentry.captureMessage(message, severity);
-          cb();
-        });
+        Sentry.captureMessage(message, severity);
       }
     });
   }
