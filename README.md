@@ -19,8 +19,16 @@ Load [pino](https://github.com/pinojs/pino) logs into [Sentry](https://sentry.io
 
 ## Install
 
+For pino 7.x
+
 ```bash
 npm install pino-sentry -g
+```
+
+For pino 6.x
+
+```bash
+npm install "pino-sentry@<1.0" -g
 ```
 
 ## Usage
