@@ -1,13 +1,10 @@
-import { Writable } from 'stream';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const build = require('pino-abstract-transport');
 
-export default () => {
-  const stream = new Writable({
-    write(chunk, _enc, cb) {
-      // apply a transform and send to stdout
-      console.log(chunk.toString().toUpperCase());
-      cb();
+export default async function (opts) {
+  return build(async function (source) {
+    for await (let obj of source) {
+      console.log(obj);
     }
   });
-
-  return stream;
-};
+}
