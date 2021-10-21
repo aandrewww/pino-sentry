@@ -1,9 +1,8 @@
 import { Writable } from 'stream';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default (options: any) => {
+export default () => {
   const stream = new Writable({
-    write(chunk, enc, cb) {
+    write(chunk, _enc, cb) {
       // apply a transform and send to stdout
       console.log(chunk.toString().toUpperCase());
       cb();
