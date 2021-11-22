@@ -51,6 +51,7 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   extraAttributeKeys?: string[];
   stackAttributeKey?: string;
   maxValueLength?: number;
+  sentryExceptionLevels?: Sentry.Severity[];
 }
 
 export class PinoSentryTransport {
@@ -60,6 +61,7 @@ export class PinoSentryTransport {
   extraAttributeKeys = ['extra'];
   stackAttributeKey = 'stack';
   maxValueLength = 250;
+  sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
@@ -167,6 +169,7 @@ export class PinoSentryTransport {
     this.extraAttributeKeys = options.extraAttributeKeys ?? this.extraAttributeKeys;
     this.messageAttributeKey = options.messageAttributeKey ?? this.messageAttributeKey;
     this.maxValueLength = options.maxValueLength ?? this.maxValueLength;
+    this.sentryExceptionLevels = options.sentryExceptionLevels ?? this.sentryExceptionLevels;
 
     return {
       dsn,
@@ -187,7 +190,7 @@ export class PinoSentryTransport {
   }
 
   private isSentryException(level: Sentry.Severity): boolean {
-    return level === Sentry.Severity.Fatal || level === Sentry.Severity.Error;
+    return this.sentryExceptionLevels.includes(level);
   }
 
   private shouldLog(severity: Sentry.Severity): boolean {
