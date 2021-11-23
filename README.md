@@ -81,9 +81,11 @@ In case the generated message does not follow the standard convention, the main 
 - `extra`
 - `stack`
 - `maxValueLength` - option to adjust max string length for values, default is 250
+- `decorateScope` - option to decorate, manipulate the sentry scope just before the capture
+- `sentryExceptionLevels` - option that represent the levels that will be handled as exceptions. Default : `error` and `fatal`
 
 ```js
-const { createWriteStream } = require("pino-sentry");
+const { createWriteStream, Sentry } = require("pino-sentry");
 // ...
 const opts = {
   /* ... */
@@ -94,6 +96,14 @@ const stream = createWriteStream({
   stackAttributeKey: "trace",
   extraAttributeKeys: ["req", "context"],
   maxValueLength: 250,
+  sentryExceptionLevels: [
+    Sentry.Severity.Warning,
+    Sentry.Severity.Error,
+    Sentry.Severity.Fatal,
+  ],
+  decorateScope: (data, scope) => {
+    scope.setUser("userId", { id: data.userId });
+  },
 });
 const logger = pino(opts, stream);
 ```
