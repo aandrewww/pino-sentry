@@ -84,6 +84,10 @@ const stream = createWriteStream({
   extraAttributeKeys: ['req', 'context'],
   maxValueLength: 250,
   sentryExceptionLevels?: Sentry.Severity['fatal', 'error', 'warning'];
+  decorateScope: (data, scope) => {
+    scope.setExtra('userId', data.userId)
+    scope.setUser({ id: data.userId })
+  }
 });
 const logger = pino(opts, stream);
 ```

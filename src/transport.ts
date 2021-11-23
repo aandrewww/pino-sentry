@@ -52,6 +52,7 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   stackAttributeKey?: string;
   maxValueLength?: number;
   sentryExceptionLevels?: Sentry.Severity[];
+  decorateScope?: (data: Record<string, unknown>, _scope: Sentry.Scope) => void;
 }
 
 export class PinoSentryTransport {
@@ -62,6 +63,7 @@ export class PinoSentryTransport {
   stackAttributeKey = 'stack';
   maxValueLength = 250;
   sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
+  decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {};
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
@@ -115,6 +117,7 @@ export class PinoSentryTransport {
     const stack = chunk[this.stackAttributeKey] || '';
 
     const scope = new Sentry.Scope();
+    this.decorateScope(chunk, scope);
 
     scope.setLevel(severity);
 
@@ -170,6 +173,7 @@ export class PinoSentryTransport {
     this.messageAttributeKey = options.messageAttributeKey ?? this.messageAttributeKey;
     this.maxValueLength = options.maxValueLength ?? this.maxValueLength;
     this.sentryExceptionLevels = options.sentryExceptionLevels ?? this.sentryExceptionLevels;
+    this.decorateScope = options.decorateScope ?? this.decorateScope;
 
     return {
       dsn,
