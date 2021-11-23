@@ -7,6 +7,7 @@ import { Breadcrumb } from '@sentry/types';
 
 type ValueOf<T> = T extends any[] ? T[number] : T[keyof T]
 
+export const SentryInstance = Sentry;
 class ExtendedError extends Error {
   public constructor(info: any) {
     super(info.message);
