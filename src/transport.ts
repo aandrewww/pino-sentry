@@ -56,6 +56,10 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   decorateScope?: (data: Record<string, unknown>, _scope: Sentry.Scope) => void;
 }
 
+function get(data: any, path: string) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], data);
+}
+
 export class PinoSentryTransport {
   // Default minimum log level to `debug`
   minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
@@ -114,8 +118,8 @@ export class PinoSentryTransport {
         extra[key] = chunk[key];
       }
     });
-    const message = chunk[this.messageAttributeKey];
-    const stack = chunk[this.stackAttributeKey] || '';
+    const message = get(chunk, this.messageAttributeKey);
+    const stack = get(chunk, this.stackAttributeKey) || '';
 
     const scope = new Sentry.Scope();
     this.decorateScope(chunk, scope);

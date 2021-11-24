@@ -77,9 +77,9 @@ Sentry.addBreadcrumb({
 
 In case the generated message does not follow the standard convention, the main attribute keys can be mapped to different values, when the stream gets created. Following attribute keys can be overridden:
 
-- `msg`
+- `msg` - the field used to get the message, it can be dot notted (eg 'data.msg')
 - `extra`
-- `stack`
+- `stack` - the field used to get the stack, it can be dot notted (eg 'err.stack')
 - `maxValueLength` - option to adjust max string length for values, default is 250
 - `decorateScope` - option to decorate, manipulate the sentry scope just before the capture
 - # `sentryExceptionLevels` - option that represent the levels that will be handled as exceptions. Default : `error` and `fatal`
