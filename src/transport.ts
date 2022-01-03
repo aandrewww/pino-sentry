@@ -68,7 +68,7 @@ export class PinoSentryTransport {
   stackAttributeKey = 'stack';
   maxValueLength = 250;
   sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
-  decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {};
+  decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
