@@ -7,6 +7,7 @@ import { Breadcrumb } from '@sentry/types';
 
 type ValueOf<T> = T extends any[] ? T[number] : T[keyof T]
 
+export const SentryInstance = Sentry;
 class ExtendedError extends Error {
   public constructor(info: any) {
     super(info.message);
@@ -51,6 +52,12 @@ interface PinoSentryOptions extends Sentry.NodeOptions {
   extraAttributeKeys?: string[];
   stackAttributeKey?: string;
   maxValueLength?: number;
+  sentryExceptionLevels?: Sentry.Severity[];
+  decorateScope?: (data: Record<string, unknown>, _scope: Sentry.Scope) => void;
+}
+
+function get(data: any, path: string) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], data);
 }
 
 export class PinoSentryTransport {
@@ -60,6 +67,8 @@ export class PinoSentryTransport {
   extraAttributeKeys = ['extra'];
   stackAttributeKey = 'stack';
   maxValueLength = 250;
+  sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
+  decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {};
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
@@ -109,10 +118,11 @@ export class PinoSentryTransport {
         extra[key] = chunk[key];
       }
     });
-    const message = chunk[this.messageAttributeKey];
-    const stack = chunk[this.stackAttributeKey] || '';
+    const message = get(chunk, this.messageAttributeKey);
+    const stack = get(chunk, this.stackAttributeKey) || '';
 
     const scope = new Sentry.Scope();
+    this.decorateScope(chunk, scope);
 
     scope.setLevel(severity);
 
@@ -167,6 +177,8 @@ export class PinoSentryTransport {
     this.extraAttributeKeys = options.extraAttributeKeys ?? this.extraAttributeKeys;
     this.messageAttributeKey = options.messageAttributeKey ?? this.messageAttributeKey;
     this.maxValueLength = options.maxValueLength ?? this.maxValueLength;
+    this.sentryExceptionLevels = options.sentryExceptionLevels ?? this.sentryExceptionLevels;
+    this.decorateScope = options.decorateScope ?? this.decorateScope;
 
     return {
       dsn,
@@ -187,7 +199,7 @@ export class PinoSentryTransport {
   }
 
   private isSentryException(level: Sentry.Severity): boolean {
-    return level === Sentry.Severity.Fatal || level === Sentry.Severity.Error;
+    return this.sentryExceptionLevels.includes(level);
   }
 
   private shouldLog(severity: Sentry.Severity): boolean {
