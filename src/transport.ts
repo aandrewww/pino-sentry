@@ -17,32 +17,43 @@ class ExtendedError extends Error {
   }
 }
 
+// Local enum declaration, as @sentry/node deprecated using enums over strings for bundle size
+enum Severity {
+  Fatal = "fatal",
+  Error = "error",
+  Warning = "warning",
+  Log = "log",
+  Info = "info",
+  Debug = "debug",
+  Critical = "critical",
+}
+
 const SEVERITIES_MAP = {
-  10: Sentry.Severity.Debug,   // pino: trace
-  20: Sentry.Severity.Debug,   // pino: debug
-  30: Sentry.Severity.Info,    // pino: info
-  40: Sentry.Severity.Warning, // pino: warn
-  50: Sentry.Severity.Error,   // pino: error
-  60: Sentry.Severity.Fatal,   // pino: fatal
+  10: Severity.Debug,   // pino: trace
+  20: Severity.Debug,   // pino: debug
+  30: Severity.Info,    // pino: info
+  40: Severity.Warning, // pino: warn
+  50: Severity.Error,   // pino: error
+  60: Severity.Fatal,   // pino: fatal
   // Support for useLevelLabels
   // https://github.com/pinojs/pino/blob/master/docs/api.md#uselevellabels-boolean
-  trace: Sentry.Severity.Debug,
-  debug: Sentry.Severity.Debug,
-  info: Sentry.Severity.Info,
-  warning: Sentry.Severity.Warning,
-  error: Sentry.Severity.Error,
-  fatal: Sentry.Severity.Fatal,
+  trace: Severity.Debug,
+  debug: Severity.Debug,
+  info: Severity.Info,
+  warning: Severity.Warning,
+  error: Severity.Error,
+  fatal: Severity.Fatal,
 } as const;
 
 // How severe the Severity is
 const SeverityIota  = {
-  [Sentry.Severity.Debug]: 1,
-  [Sentry.Severity.Log]: 2,
-  [Sentry.Severity.Info]: 3,
-  [Sentry.Severity.Warning]: 4,
-  [Sentry.Severity.Error]: 5,
-  [Sentry.Severity.Fatal]: 6,
-  [Sentry.Severity.Critical]: 7,
+  [Severity.Debug]: 1,
+  [Severity.Log]: 2,
+  [Severity.Info]: 3,
+  [Severity.Warning]: 4,
+  [Severity.Error]: 5,
+  [Severity.Fatal]: 6,
+  [Severity.Critical]: 7,
 } as const;
 
 export interface PinoSentryOptions extends Sentry.NodeOptions {
@@ -52,7 +63,7 @@ export interface PinoSentryOptions extends Sentry.NodeOptions {
   extraAttributeKeys?: string[];
   stackAttributeKey?: string;
   maxValueLength?: number;
-  sentryExceptionLevels?: Sentry.Severity[];
+  sentryExceptionLevels?: Severity[];
   decorateScope?: (data: Record<string, unknown>, _scope: Sentry.Scope) => void;
 }
 
@@ -62,20 +73,20 @@ function get(data: any, path: string) {
 
 export class PinoSentryTransport {
   // Default minimum log level to `debug`
-  minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
+  minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Severity.Debug];
   messageAttributeKey = 'msg';
   extraAttributeKeys = ['extra'];
   stackAttributeKey = 'stack';
   maxValueLength = 250;
-  sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
+  sentryExceptionLevels = [Severity.Fatal, Severity.Error];
   decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
   }
 
-  public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Sentry.Severity {
-    return SEVERITIES_MAP[level] || Sentry.Severity.Info;
+  public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Severity {
+    return SEVERITIES_MAP[level] || Severity.Info;
   }
 
   public get sentry() {
@@ -124,7 +135,7 @@ export class PinoSentryTransport {
     const scope = new Sentry.Scope();
     this.decorateScope(chunk, scope);
 
-    scope.setLevel(severity);
+    scope.setLevel(severity as any);
 
     if (this.isObject(tags)) {
       Object.keys(tags).forEach(tag => scope.setTag(tag, tags[tag]));
@@ -198,11 +209,11 @@ export class PinoSentryTransport {
     return type === 'function' || type === 'object' && !!obj;
   }
 
-  private isSentryException(level: Sentry.Severity): boolean {
+  private isSentryException(level: Severity): boolean {
     return this.sentryExceptionLevels.includes(level);
   }
 
-  private shouldLog(severity: Sentry.Severity): boolean {
+  private shouldLog(severity: Severity): boolean {
     const logLevel = SeverityIota[severity];
     return logLevel >= this.minimumLogLevel;
   }
