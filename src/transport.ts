@@ -1,6 +1,6 @@
 import stream  from 'stream';
 import split from 'split2';
-import pump from 'pumpify';
+import Pump from 'pumpify';
 import through from 'through2';
 import * as Sentry from '@sentry/node';
 import { Breadcrumb } from '@sentry/types';
@@ -212,7 +212,7 @@ export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
 
-  return new pump(
+  return new Pump(
     split((line) => {
       try {
         return JSON.parse(line);
