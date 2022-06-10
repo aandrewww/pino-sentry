@@ -23,6 +23,15 @@ Load [pino](https://github.com/pinojs/pino) logs into [Sentry](https://sentry.io
 npm install pino-sentry -g
 ```
 
+Note: The v7 version of the Sentry JavaScript SDK requires a self-hosted
+version of Sentry 20.6.0 or higher. If you are using a version of self-hosted
+Sentry (aka onpremise) older than 20.6.0 then you will need to upgrade. See
+[sentry-javascript@7.0.0] release notes.
+
+Alternatively you can pin `@sentry/*` packages to 6.x.
+
+[sentry-javascript@7.0.0]: https://github.com/getsentry/sentry-javascript/releases/tag/7.0.0
+
 ## Usage
 
 ### CLI
