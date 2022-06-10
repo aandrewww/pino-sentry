@@ -118,7 +118,7 @@ export class PinoSentryTransport {
         extra[key] = chunk[key];
       }
     });
-    const message = get(chunk, this.messageAttributeKey);
+    const message: any & Error = get(chunk, this.messageAttributeKey);
     const stack = get(chunk, this.stackAttributeKey) || '';
 
     const scope = new Sentry.Scope();
