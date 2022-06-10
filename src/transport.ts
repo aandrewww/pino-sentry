@@ -206,7 +206,7 @@ export class PinoSentryTransport {
     const logLevel = SeverityIota[severity];
     return logLevel >= this.minimumLogLevel;
   }
-};
+}
 
 export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   const transport = new PinoSentryTransport(options);
@@ -223,7 +223,7 @@ export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
     }),
     sentryTransformer
   );
-};
+}
 
 // Duplicate to not break API
 export const createWriteStreamAsync = createWriteStream;
