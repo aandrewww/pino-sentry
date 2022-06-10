@@ -25,6 +25,8 @@ enum Severity {
   Log = "log",
   Info = "info",
   Debug = "debug",
+  // @deprecated: "critical" is not present in sentry 7.x sdk
+  // https://github.com/getsentry/sentry-javascript/issues/3067
   Critical = "critical",
 }
 
