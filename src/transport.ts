@@ -92,7 +92,7 @@ export class PinoSentryTransport {
     const severity = this.getLogSeverity(chunk.level);
 
     // Check if we send this Severity to Sentry
-    if (this.shouldLog(severity) === false) {
+    if (!this.shouldLog(severity)) {
       setImmediate(cb);
       return;
     }
@@ -165,7 +165,7 @@ export class PinoSentryTransport {
     if (options.level) {
       const allowedLevels = Object.keys(SeverityIota);
 
-      if (allowedLevels.includes(options.level) === false)  {
+      if (!allowedLevels.includes(options.level))  {
         throw new Error(`[pino-sentry] Option \`level\` must be one of: ${allowedLevels.join(', ')}. Received: ${options.level}`);
       }
 
