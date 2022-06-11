@@ -18,7 +18,7 @@ class ExtendedError extends Error {
 }
 
 // Local enum declaration, as @sentry/node deprecated using enums over strings for bundle size
-enum Severity {
+export enum Severity {
   Fatal = "fatal",
   Error = "error",
   Warning = "warning",
