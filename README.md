@@ -94,7 +94,7 @@ In case the generated message does not follow the standard convention, the main 
 - `sentryExceptionLevels` - option that represent the levels that will be handled as exceptions. Default : `error` and `fatal`
 
 ```js
-const { createWriteStream, Sentry } = require("pino-sentry");
+const { createWriteStream, Severity } = require("pino-sentry");
 // ...
 const opts = {
   /* ... */
@@ -106,9 +106,9 @@ const stream = createWriteStream({
   extraAttributeKeys: ["req", "context"],
   maxValueLength: 250,
   sentryExceptionLevels: [
-    Sentry.Severity.Warning,
-    Sentry.Severity.Error,
-    Sentry.Severity.Fatal,
+    Severity.Warning,
+    Severity.Error,
+    Severity.Fatal,
   ],
   decorateScope: (data, scope) => {
     scope.setUser("userId", { id: data.userId });
