@@ -1,7 +1,7 @@
-const pinoLogger = require('pino');
-const { createWriteStream } = require('../dist/index');
+import pinoLogger from "pino";
+import { createWriteStream } from "../src";
 
-function main() {
+test('Test logger creation', () => {
   const SENTRY_DSN = "https://123@123.ingest.sentry.io/123";
 
   const options = {
@@ -14,6 +14,4 @@ function main() {
 
   logger.info('testtt info log');
   logger.error('testtt log');
-}
-
-main();
+});
