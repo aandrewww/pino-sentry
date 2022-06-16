@@ -19,7 +19,7 @@ function main() {
     .option('--maxValueLength <maxValueLength>', 'Maximum number of chars a single value can have before it will be truncated.')
     .option('--release <release>', 'The release identifier used when uploading respective source maps.')
     .option('-l, --level <level>', 'The minimum level for a log to be reported to Sentry')
-    .action(({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, logLevel, maxValueLength, release, level }) => {
+    .action(({ dsn, serverName, environment, debug, sampleRate, maxBreadcrumbs, dist, maxValueLength, release, level }) => {
       try {
         const writeStream = createWriteStream({
           dsn,
@@ -29,7 +29,6 @@ function main() {
           sampleRate,
           maxBreadcrumbs,
           dist,
-          logLevel,
           maxValueLength,
           release,
           level,
