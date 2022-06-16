@@ -1,4 +1,5 @@
 import stream  from 'stream';
+import { AsyncResource } from 'async_hooks';
 import split from 'split2';
 import Pump from 'pumpify';
 import through from 'through2';
@@ -101,7 +102,13 @@ export class PinoSentryTransport {
     });
   }
 
-  public prepareAndGo(chunk: any, cb: any): void {
+  public prepareAndGo(chunkInfo: ChunkInfo, cb: any): void {
+    chunkInfo.run((chunk) => {
+      this.chunkInfoCallback(chunk, cb);
+    });
+  }
+
+  private chunkInfoCallback(chunk: any, cb: any) {
     const severity = this.getLogSeverity(chunk.level);
 
     // Check if we send this Severity to Sentry
@@ -221,6 +228,20 @@ export class PinoSentryTransport {
   }
 }
 
+class ChunkInfo extends AsyncResource {
+  constructor(private readonly chunk: any) {
+    super("ChunkInfo");
+  }
+
+  run<T extends readonly unknown[], R>(callback: (...args: any[]) => R, ...args: T): R {
+    try {
+      return this.runInAsyncScope(callback, undefined, this.chunk, ...args);
+    } finally {
+      this.emitDestroy();
+    }
+  }
+}
+
 export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
@@ -228,7 +249,7 @@ export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   return new Pump(
     split((line) => {
       try {
-        return JSON.parse(line);
+        return new ChunkInfo(JSON.parse(line));
       } catch (e) {
         // Returning undefined will not run the sentryTransformer
         return;
