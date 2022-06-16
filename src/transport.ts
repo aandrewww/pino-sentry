@@ -18,36 +18,36 @@ class ExtendedError extends Error {
 }
 
 const SEVERITIES_MAP = {
-  10: Sentry.Severity.Debug,   // pino: trace
-  20: Sentry.Severity.Debug,   // pino: debug
-  30: Sentry.Severity.Info,    // pino: info
-  40: Sentry.Severity.Warning, // pino: warn
-  50: Sentry.Severity.Error,   // pino: error
-  60: Sentry.Severity.Fatal,   // pino: fatal
+  10: 'debug',   // pino: trace
+  20: 'debug',   // pino: debug
+  30: 'info',    // pino: info
+  40: 'warning', // pino: warn
+  50: 'error',   // pino: error
+  60: 'fatal',   // pino: fatal
   // Support for useLevelLabels
   // https://github.com/pinojs/pino/blob/master/docs/api.md#uselevellabels-boolean
-  trace: Sentry.Severity.Debug,
-  debug: Sentry.Severity.Debug,
-  info: Sentry.Severity.Info,
-  warning: Sentry.Severity.Warning,
-  error: Sentry.Severity.Error,
-  fatal: Sentry.Severity.Fatal,
+  trace: 'debug',
+  debug: 'debug',
+  info: 'info',
+  warning: 'warning',
+  error: 'error',
+  fatal: 'fatal',
 } as const;
 
 // How severe the Severity is
-const SeverityIota  = {
-  [Sentry.Severity.Debug]: 1,
-  [Sentry.Severity.Log]: 2,
-  [Sentry.Severity.Info]: 3,
-  [Sentry.Severity.Warning]: 4,
-  [Sentry.Severity.Error]: 5,
-  [Sentry.Severity.Fatal]: 6,
-  [Sentry.Severity.Critical]: 7,
-} as const;
+const SeverityIota: {[x: string]: number}  = {
+  ['debug']: 1,
+  ['log']: 2,
+  ['info']: 3,
+  ['warning']: 4,
+  ['error']: 5,
+  ['fatal']: 6,
+  ['critical']: 7,
+};
 
 interface PinoSentryOptions extends Sentry.NodeOptions {
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
-  level?: keyof typeof SeverityIota;
+  level?: string;
   messageAttributeKey?: string;
   extraAttributeKeys?: string[];
   stackAttributeKey?: string;
@@ -62,20 +62,20 @@ function get(data: any, path: string) {
 
 export class PinoSentryTransport {
   // Default minimum log level to `debug`
-  minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Sentry.Severity.Debug]
+  minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota['debug']
   messageAttributeKey = 'msg';
   extraAttributeKeys = ['extra'];
   stackAttributeKey = 'stack';
   maxValueLength = 250;
-  sentryExceptionLevels = [Sentry.Severity.Fatal,Sentry.Severity.Error];
+  sentryExceptionLevels = ['fatal','error'];
   decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
   public constructor(options?: PinoSentryOptions) {
     Sentry.init(this.validateOptions(options || {}));
   }
 
-  public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Sentry.Severity {
-    return SEVERITIES_MAP[level] || Sentry.Severity.Info;
+  public getLogSeverity(level: keyof typeof SEVERITIES_MAP): string {
+    return SEVERITIES_MAP[level] || 'info';
   }
 
   public get sentry() {
@@ -124,7 +124,7 @@ export class PinoSentryTransport {
     const scope = new Sentry.Scope();
     this.decorateScope(chunk, scope);
 
-    scope.setLevel(severity);
+    scope.setLevel(severity as Sentry.SeverityLevel);
 
     if (this.isObject(tags)) {
       Object.keys(tags).forEach(tag => scope.setTag(tag, tags[tag]));
@@ -198,11 +198,11 @@ export class PinoSentryTransport {
     return type === 'function' || type === 'object' && !!obj;
   }
 
-  private isSentryException(level: Sentry.Severity): boolean {
+  private isSentryException(level: string): boolean {
     return this.sentryExceptionLevels.includes(level);
   }
 
-  private shouldLog(severity: Sentry.Severity): boolean {
+  private shouldLog(severity: string): boolean {
     const logLevel = SeverityIota[severity];
     return logLevel >= this.minimumLogLevel;
   }
