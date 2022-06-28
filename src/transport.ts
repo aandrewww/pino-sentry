@@ -45,7 +45,7 @@ const SeverityIota  = {
   [Sentry.Severity.Critical]: 7,
 } as const;
 
-interface PinoSentryOptions extends Sentry.NodeOptions {
+export interface PinoSentryOptions extends Sentry.NodeOptions {
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
   level?: keyof typeof SeverityIota;
   messageAttributeKey?: string;
