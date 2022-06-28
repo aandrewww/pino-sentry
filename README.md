@@ -23,6 +23,15 @@ Load [pino](https://github.com/pinojs/pino) logs into [Sentry](https://sentry.io
 npm install pino-sentry -g
 ```
 
+Note: The v7 version of the Sentry JavaScript SDK requires a self-hosted
+version of Sentry 20.6.0 or higher. If you are using a version of self-hosted
+Sentry (aka onpremise) older than 20.6.0 then you will need to upgrade. See
+[sentry-javascript@7.0.0] release notes.
+
+Alternatively you can pin `@sentry/*` packages to 6.x.
+
+[sentry-javascript@7.0.0]: https://github.com/getsentry/sentry-javascript/releases/tag/7.0.0
+
 ## Usage
 
 ### CLI
@@ -85,7 +94,7 @@ In case the generated message does not follow the standard convention, the main 
 - `sentryExceptionLevels` - option that represent the levels that will be handled as exceptions. Default : `error` and `fatal`
 
 ```js
-const { createWriteStream, Sentry } = require("pino-sentry");
+const { createWriteStream, Severity } = require("pino-sentry");
 // ...
 const opts = {
   /* ... */
@@ -97,9 +106,9 @@ const stream = createWriteStream({
   extraAttributeKeys: ["req", "context"],
   maxValueLength: 250,
   sentryExceptionLevels: [
-    Sentry.Severity.Warning,
-    Sentry.Severity.Error,
-    Sentry.Severity.Fatal,
+    Severity.Warning,
+    Severity.Error,
+    Severity.Fatal,
   ],
   decorateScope: (data, scope) => {
     scope.setUser("userId", { id: data.userId });
