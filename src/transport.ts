@@ -1,6 +1,6 @@
 import stream  from 'stream';
 import split from 'split2';
-import pump from 'pumpify';
+import Pump from 'pumpify';
 import through from 'through2';
 import * as Sentry from '@sentry/node';
 import { Breadcrumb } from '@sentry/types';
@@ -92,7 +92,7 @@ export class PinoSentryTransport {
     const severity = this.getLogSeverity(chunk.level);
 
     // Check if we send this Severity to Sentry
-    if (this.shouldLog(severity) === false) {
+    if (!this.shouldLog(severity)) {
       setImmediate(cb);
       return;
     }
@@ -118,7 +118,7 @@ export class PinoSentryTransport {
         extra[key] = chunk[key];
       }
     });
-    const message = get(chunk, this.messageAttributeKey);
+    const message: any & Error = get(chunk, this.messageAttributeKey);
     const stack = get(chunk, this.stackAttributeKey) || '';
 
     const scope = new Sentry.Scope();
@@ -165,7 +165,7 @@ export class PinoSentryTransport {
     if (options.level) {
       const allowedLevels = Object.keys(SeverityIota);
 
-      if (allowedLevels.includes(options.level) === false)  {
+      if (!allowedLevels.includes(options.level))  {
         throw new Error(`[pino-sentry] Option \`level\` must be one of: ${allowedLevels.join(', ')}. Received: ${options.level}`);
       }
 
@@ -206,13 +206,13 @@ export class PinoSentryTransport {
     const logLevel = SeverityIota[severity];
     return logLevel >= this.minimumLogLevel;
   }
-};
+}
 
 export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
   const transport = new PinoSentryTransport(options);
   const sentryTransformer = transport.transformer();
 
-  return new pump(
+  return new Pump(
     split((line) => {
       try {
         return JSON.parse(line);
@@ -223,7 +223,7 @@ export function createWriteStream(options?: PinoSentryOptions): stream.Duplex {
     }),
     sentryTransformer
   );
-};
+}
 
 // Duplicate to not break API
 export const createWriteStreamAsync = createWriteStream;
