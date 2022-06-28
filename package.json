@@ -22,7 +22,7 @@
     "clean": "rm -rf dist",
     "build": "tsc -b tsconfig.build.json",
     "lint": "eslint src/**/*.ts",
-    "test": "node ./test/test.js",
+    "test": "jest",
     "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "repository": "https://github.com/aandrewww/pino-sentry.git",
@@ -42,14 +42,20 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
+    "@jest/types": "^28.1.1",
+    "@types/jest": "^28.1.1",
     "@types/node": "^12.6.9",
+    "@types/pino": "^6.3.12",
     "@types/pumpify": "^1.4.1",
     "@types/split2": "^2.1.6",
     "@types/through2": "^2.0.34",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "eslint": "^6.8.0",
+    "jest": "^28.1.1",
     "pino": "^6.5.1",
-    "typescript": "^3.9.7"
+    "ts-jest": "^28.0.4",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
   }
 }
