@@ -1,0 +1,20 @@
+name: Build TypeScript
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build package
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: npm
+      - run: npm ci
+      - run: npm run-script build
+
+# vim:ts=2:sw=2:et
