@@ -1,6 +1,5 @@
 # pino-sentry
 
-[![CircleCI](https://circleci.com/gh/aandrewww/pino-sentry.svg?style=svg)](https://circleci.com/gh/aandrewww/pino-sentry)
 [![node](https://img.shields.io/badge/node-10.0+-brightgreen.svg)][node-url]
 [![license](https://img.shields.io/github/license/aandrewww/pino-sentry.svg)][license-url]
 
