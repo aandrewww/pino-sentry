@@ -1,27 +1,5 @@
-# OSX
-#
-.DS_Store
-
-# node.js
-#
-node_modules
-yarn.lock
-npm-debug.log
-yarn-error.log
-
-# VSCode
-.vscode
-
-src
-test
-.editorconfig
-.eslintignore
-.eslintrc
-.gitignore
-.npmignore
-circle.yml
-package-lock.json
-README.md
-
-tsconfig.build.json
-tsconfig.json
+*
+!/LICENSE
+!/README.md
+!/dist/**/*
+!/package.json
