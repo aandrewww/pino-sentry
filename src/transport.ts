@@ -155,16 +155,12 @@ export class PinoSentryTransport {
     if (this.isSentryException(severity)) {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
-      setImmediate(() => {
-        Sentry.captureException(error, scope);
-        cb();
-      });
+      Sentry.captureException(error, scope);
+      setImmediate(cb);
     } else {
       // Capturing Messages
-      setImmediate(() => {
-        Sentry.captureMessage(message, scope);
-        cb();
-      });
+      Sentry.captureMessage(message, scope);
+      setImmediate(cb);
     }
   }
 
