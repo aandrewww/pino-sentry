@@ -134,8 +134,9 @@ export class PinoSentryTransport {
 
     const extra: any = {};
     this.extraAttributeKeys.forEach((key: string) => {
-      if(chunk[key] !== undefined) {
-        extra[key] = chunk[key];
+      const value = get(chunk, key);
+      if(value !== undefined) {
+        extra[key] = value;
       }
     });
     const message: any & Error = get(chunk, this.messageAttributeKey);
