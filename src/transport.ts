@@ -77,6 +77,7 @@ function get(data: any, path: string) {
 }
 
 export class PinoSentryTransport {
+  public readonly sentry: typeof Sentry;
   // Default minimum log level to `debug`
   minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Severity.Debug];
   messageAttributeKey = 'msg';
@@ -87,15 +88,17 @@ export class PinoSentryTransport {
   decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
   public constructor(options?: PinoSentryOptions) {
-    Sentry.init(this.validateOptions(options || {}));
+    const { sentry, ...initOptions} = this.validateOptions(options || {});
+    if (sentry) {
+      this.sentry = sentry;
+    } else {
+      Sentry.init(initOptions);
+      this.sentry = Sentry;
+    }
   }
 
   public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Severity {
     return SEVERITIES_MAP[level] || Severity.Info;
-  }
-
-  public get sentry() {
-    return Sentry;
   }
 
   public transformer(): stream.Transform {
