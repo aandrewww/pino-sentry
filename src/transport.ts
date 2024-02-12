@@ -60,6 +60,8 @@ const SeverityIota  = {
 } as const;
 
 export interface PinoSentryOptions extends Sentry.NodeOptions {
+  // Instance of Sentry, otherwise Sentry.init() is called
+  sentry?: typeof Sentry;
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
   level?: keyof typeof SeverityIota;
   messageAttributeKey?: string;
