@@ -59,7 +59,7 @@ const SeverityIota  = {
   [Severity.Critical]: 7,
 } as const;
 
-export interface PinoSentryOptions extends Sentry.NodeOptions {
+export interface PinoSentryOptions {
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
   level?: keyof typeof SeverityIota;
   messageAttributeKey?: string;
@@ -84,8 +84,15 @@ export class PinoSentryTransport {
   sentryExceptionLevels = [Severity.Fatal, Severity.Error];
   decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
-  public constructor(options?: PinoSentryOptions) {
-    Sentry.init(this.validateOptions(options || {}));
+  
+  public constructor(options?: PinoSentryOptions & Sentry.NodeOptions)
+  public constructor(options?: PinoSentryOptions, initializeSentry: false)
+  public constructor(options?: any, initializeSentry?: boolean = true) {
+    const validatedOptions = this.validateOptions(options || {});
+
+    if (initializeSentry) {
+      Sentry.init(validatedOptions)
+    }
   }
 
   public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Severity {
