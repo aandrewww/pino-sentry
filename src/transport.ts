@@ -147,7 +147,7 @@ export class PinoSentryTransport {
     const message: any & Error = get(chunk, this.messageAttributeKey);
     const stack = get(chunk, this.stackAttributeKey) || '';
 
-    const scope = new Sentry.Scope();
+    const scope = new this.sentry.Scope();
     this.decorateScope(chunk, scope);
 
     scope.setLevel(severity as any);
@@ -168,11 +168,11 @@ export class PinoSentryTransport {
     if (this.isSentryException(severity)) {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
-      Sentry.captureException(error, scope);
+      this.sentry.captureException(error, scope);
       setImmediate(cb);
     } else {
       // Capturing Messages
-      Sentry.captureMessage(message, scope);
+      this.sentry.captureMessage(message, scope);
       setImmediate(cb);
     }
   }
