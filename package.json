@@ -34,14 +34,17 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@sentry/node": "^6.2.5||^7.1.1",
     "commander": "^2.20.0",
     "pumpify": "^2.0.1",
     "split2": "^3.1.1",
     "through2": "^3.0.1"
   },
+  "peerDependencies": {
+    "@sentry/node": "^6.2.5||^7.1.1"
+  },
   "devDependencies": {
     "@jest/types": "^28.1.1",
+    "@sentry/node": "^6.2.5||^7.1.1",
     "@types/jest": "^28.1.1",
     "@types/node": "^12.6.9",
     "@types/pino": "^6.3.12",
