@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "@jest/types": "^28.1.1",
+    "@sentry/node": "^6.2.5||^7.1.1",
     "@types/jest": "^28.1.1",
     "@types/node": "^12.6.9",
     "@types/pino": "^6.3.12",
