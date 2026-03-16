@@ -60,6 +60,8 @@ const SeverityIota  = {
 } as const;
 
 export interface PinoSentryOptions extends Sentry.NodeOptions {
+  // Instance of Sentry, otherwise Sentry.init() is called
+  sentry?: typeof Sentry;
   /** Minimum level for a log to be reported to Sentry from pino-sentry */
   level?: keyof typeof SeverityIota;
   messageAttributeKey?: string;
@@ -75,6 +77,7 @@ function get(data: any, path: string) {
 }
 
 export class PinoSentryTransport {
+  public readonly sentry: typeof Sentry;
   // Default minimum log level to `debug`
   minimumLogLevel: ValueOf<typeof SeverityIota> = SeverityIota[Severity.Debug];
   messageAttributeKey = 'msg';
@@ -85,15 +88,17 @@ export class PinoSentryTransport {
   decorateScope = (_data: Record<string, unknown>, _scope: Sentry.Scope) => {/**/};
 
   public constructor(options?: PinoSentryOptions) {
-    Sentry.init(this.validateOptions(options || {}));
+    const { sentry, ...initOptions} = this.validateOptions(options || {});
+    if (sentry) {
+      this.sentry = sentry;
+    } else {
+      Sentry.init(initOptions);
+      this.sentry = Sentry;
+    }
   }
 
   public getLogSeverity(level: keyof typeof SEVERITIES_MAP): Severity {
     return SEVERITIES_MAP[level] || Severity.Info;
-  }
-
-  public get sentry() {
-    return Sentry;
   }
 
   public transformer(): stream.Transform {
@@ -142,7 +147,7 @@ export class PinoSentryTransport {
     const message: any & Error = get(chunk, this.messageAttributeKey);
     const stack = get(chunk, this.stackAttributeKey) || '';
 
-    const scope = new Sentry.Scope();
+    const scope = new this.sentry.Scope();
     this.decorateScope(chunk, scope);
 
     scope.setLevel(severity as any);
@@ -163,11 +168,11 @@ export class PinoSentryTransport {
     if (this.isSentryException(severity)) {
       const error = message instanceof Error ? message : new ExtendedError({ message, stack });
 
-      Sentry.captureException(error, scope);
+      this.sentry.captureException(error, scope);
       setImmediate(cb);
     } else {
       // Capturing Messages
-      Sentry.captureMessage(message, scope);
+      this.sentry.captureMessage(message, scope);
       setImmediate(cb);
     }
   }
