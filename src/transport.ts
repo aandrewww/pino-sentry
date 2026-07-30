@@ -118,7 +118,7 @@ export class PinoSentryTransport {
     }
 
     const tags = chunk.tags || {};
-    const breadcrumbs: Breadcrumb[] = chunk.breadcrumbs || {};
+    const breadcrumbs: Breadcrumb[] = chunk.breadcrumbs || [];
 
     if (chunk.reqId) {
       tags.uuid = chunk.reqId;
@@ -135,8 +135,12 @@ export class PinoSentryTransport {
     const extra: any = {};
     this.extraAttributeKeys.forEach((key: string) => {
       const value = get(chunk, key);
-      if(value !== undefined) {
-        extra[key] = value;
+      if (value !== undefined) {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          Object.assign(extra, value);
+        } else {
+          extra[key] = value;
+        }
       }
     });
     const message: any & Error = get(chunk, this.messageAttributeKey);
@@ -155,8 +159,8 @@ export class PinoSentryTransport {
       Object.keys(extra).forEach(ext => scope.setExtra(ext, extra[ext]));
     }
 
-    if (this.isObject(breadcrumbs)) {
-      Object.values(breadcrumbs).forEach(breadcrumb => scope.addBreadcrumb(breadcrumb));
+    if (Array.isArray(breadcrumbs)) {
+      breadcrumbs.forEach(breadcrumb => scope.addBreadcrumb(breadcrumb));
     }
 
     // Capturing Errors / Exceptions
