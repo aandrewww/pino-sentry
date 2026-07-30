@@ -9,8 +9,9 @@ yarn.lock
 npm-debug.log
 yarn-error.log
 
-# VSCode
+# IDEs
 .vscode
+.idea
 
 # Specific
 dist
